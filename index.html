@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Holyrics Editor — Editor de Letras</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app" id="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <h1>Holyrics Editor</h1>
+        <button id="themeToggle" aria-label="Alternar tema">🌗</button>
+      </div>
+      <div class="stats">
+        <div class="stat">
+          <div class="num" id="songsCount">0</div>
+          <div class="label">Músicas</div>
+        </div>
+        <div class="stat">
+          <div class="num" id="foldersCount">0</div>
+          <div class="label">Pastas</div>
+        </div>
+        <div class="stat">
+          <div class="num" id="recentCount">0</div>
+          <div class="label">Recentes</div>
+        </div>
+      </div>
+
+      <div class="folders">
+        <div class="folders-header">
+          <h3>Pastas</h3>
+          <button id="newFolderBtn">+</button>
+        </div>
+        <ul id="folderList" class="folder-list"></ul>
+      </div>
+
+      <div class="recent">
+        <h3>Recentes</h3>
+        <ul id="recentList" class="recent-list"></ul>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <input id="search" placeholder="Buscar músicas..." />
+        <div class="actions">
+          <button id="newSongBtn">Nova Música</button>
+          <button id="importBtn">Importar .txt</button>
+        </div>
+      </header>
+
+      <section class="content">
+        <aside class="left-panel">
+          <ul id="songList" class="song-list"></ul>
+        </aside>
+
+        <section class="editor-panel">
+          <form id="songForm" class="song-form">
+            <input id="songTitle" placeholder="Título da música" required />
+            <select id="songFolder"><option value="">— Sem pasta —</option></select>
+            <textarea id="lyrics" placeholder="Edite a letra aqui. Use 'Enter' para pular linhas como deseja que apareça no telão."></textarea>
+
+            <div class="form-actions">
+              <button type="submit">Salvar</button>
+              <button type="button" id="downloadBtn">Baixar .txt (Holyrics)</button>
+              <button type="button" id="deleteBtn" class="danger">Excluir</button>
+            </div>
+          </form>
+        </section>
+      </section>
+    </main>
+  </div>
+
+  <template id="songItemTpl">
+    <li class="song-item">
+      <div class="song-title"></div>
+      <div class="song-meta"></div>
+    </li>
+  </template>
+
+  <script type="module" src="firebase.js"></script>
+  <script type="module" src="app.js"></script>
+</body>
+</html>
