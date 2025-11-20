@@ -82,9 +82,143 @@ body{
 .form-actions .danger{background:var(--danger)}
 .form-actions button:disabled{background:var(--muted);color:rgba(255,255,255,0.7);cursor:not-allowed}
 
-@media (max-width:900px){
-  .sidebar{display:none}
-  .left-panel{display:none}
-  .topbar input{min-width:120px}
-  .song-form textarea{min-height:240px}
+/* NOVO: Estilos da Navegação Móvel (oculta no desktop) */
+.mobile-nav{display:none}
+
+
+/* ---- MOBILE STYLES ---- */
+@media (max-width:800px){
+  html, body {
+    /* Usa a altura de viewport pequena, ideal para mobile */
+    height: 100svh; 
+  }
+  .app{
+    flex-direction: column;
+    height: 100svh;
+  }
+  .main{
+    flex: 1;
+    /* Evita que o .main role, deixando os painéis internos rolarem */
+    overflow: hidden; 
+  }
+  .content{
+    /* Faz o .content preencher todo o .main */
+    height: 100%; 
+    padding: 10px;
+    gap: 10px;
+  }
+  .topbar{
+    flex-wrap: wrap; /* Permite que os itens quebrem linha */
+    gap: 8px;
+    padding: 10px;
+  }
+  .topbar input{
+    min-width: 150px;
+    flex-grow: 1; /* Campo de busca cresce */
+  }
+  .topbar .actions {
+    flex-grow: 1; /* Ações crescem */
+    display: flex;
+    justify-content: flex-end; /* Alinha botões à direita */
+    margin-left: 0;
+  }
+  
+  /* Ajustes de Painel para Mobile (viram telas cheias) */
+  .sidebar{
+    width: 100%;
+    border-right: 0;
+    padding-bottom: 80px; /* Espaço para a nav-bar */
+    overflow-y: auto;
+    height: 100%;
+  }
+  .left-panel{
+    width: 100%;
+    height: 100%;
+    padding: 10px; /* Re-adiciona padding */
+    border-radius: 10px; /* Mantém o visual do painel */
+  }
+  .editor-panel{
+    width: 100%;
+    height: 100%;
+    padding: 10px;
+    border-radius: 10px;
+  }
+  .song-list{
+    max-height: none; /* Deixa o .left-panel controlar a rolagem */
+  }
+  .song-form textarea{
+    min-height: 240px;
+  }
+
+  /* LÓGICA DE EXIBIÇÃO MÓVEL */
+  
+  /* 1. Esconde todos os painéis principais por padrão */
+  .sidebar, .main {
+    display: none;
+  }
+
+  /* 2. Mostra o painel baseado no data-attribute do .app */
+  
+  /* Vendo o MENU (Sidebar) */
+  .app[data-mobile-view="menu"] .sidebar {
+    display: flex;
+  }
+  
+  /* Vendo MÚSICAS ou EDITOR (Main) */
+  .app[data-mobile-view="songs"] .main,
+  .app[data-mobile-view="editor"] .main {
+    display: flex;
+  }
+  
+  /* 3. Alterna os sub-painéis dentro do .main */
+  
+  /* Vendo MÚSICAS (Left Panel) */
+  .app[data-mobile-view="songs"] .left-panel {
+    display: flex;
+  }
+  .app[data-mobile-view="songs"] .editor-panel {
+    display: none;
+  }
+
+  /* Vendo EDITOR (Editor Panel) */
+  .app[data-mobile-view="editor"] .left-panel {
+    display: none;
+  }
+  .app[data-mobile-view="editor"] .editor-panel {
+    display: flex;
+  }
+
+  /* ESTILOS DA BARRA DE NAVEGAÇÃO */
+  .mobile-nav{
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    background: var(--panel);
+    border-top: 1px solid rgba(11,27,43,0.08);
+    z-index: 1000;
+    box-shadow: 0 -2px 10px rgba(11,27,43,0.05);
+  }
+  .mobile-nav-btn {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: 0;
+    color: var(--muted);
+    font-size: 10px;
+    padding: 4px 0;
+    cursor: pointer;
+    gap: 2px;
+  }
+  .mobile-nav-btn .icon {
+    font-size: 20px;
+  }
+  .mobile-nav-btn.active {
+    color: var(--accent);
+  }
 }
