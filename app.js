@@ -5,6 +5,7 @@ const songsCol = collection(db, 'songs');
 const foldersCol = collection(db, 'folders');
 
 const $ = sel => document.querySelector(sel);
+const appEl = $('#app'); // NOVO
 const songListEl = $('#songList');
 const folderListEl = $('#folderList');
 const recentListEl = $('#recentList');
@@ -16,13 +17,19 @@ const form = $('#songForm');
 const titleInput = $('#songTitle');
 const folderSelect = $('#songFolder');
 const lyricsInput = $('#lyrics');
-const saveBtn = $('#saveBtn'); // NOVO
+const saveBtn = $('#saveBtn'); 
 const downloadBtn = $('#downloadBtn');
 const deleteBtn = $('#deleteBtn');
 const newSongBtn = $('#newSongBtn');
 const newFolderBtn = $('#newFolderBtn');
-const importBtn = $('#importBtn'); // NOVO
+const importBtn = $('#importBtn'); 
 const searchInput = $('#search');
+
+// NOVO: Seletores da Navegação Móvel
+const mobileNavMenu = $('#mobileNavMenu');
+const mobileNavSongs = $('#mobileNavSongs');
+const mobileNavEditor = $('#mobileNavEditor');
+const mobileNavBtns = document.querySelectorAll('.mobile-nav-btn');
 
 let currentSongId = null;
 let songsCache = [];
@@ -47,7 +54,6 @@ async function refreshCounts(){
   recentCountEl.textContent = Math.min(5, songsCache.length);
 }
 
-// NOVO: Helper para marcar pasta ativa na UI
 function setActiveFolder(folderId) {
   folderId = folderId || 'all';
   document.querySelectorAll('#folderList li').forEach(li => {
@@ -62,7 +68,6 @@ function setActiveFolder(folderId) {
 function renderFolders(){
   folderListEl.innerHTML = '';
   
-  // NOVO: Adiciona o botão "Todas as Músicas"
   const allLi = document.createElement('li');
   allLi.textContent = 'Todas as Músicas';
   allLi.dataset.id = 'all';
@@ -107,15 +112,28 @@ function renderSongs(list){
     item.addEventListener('click', ()=> loadSong(s.id));
     songListEl.appendChild(item);
   });
-  // MELHORIA: Atualiza contagem de músicas *filtradas*
   songsCountEl.textContent = list.length;
+}
+
+// NOVO: Helper para controlar a visualização móvel
+function setMobileView(view) {
+  appEl.dataset.mobileView = view;
+  mobileNavBtns.forEach(btn => btn.classList.remove('active'));
+  
+  if (view === 'menu') mobileNavMenu.classList.add('active');
+  if (view === 'songs') mobileNavSongs.classList.add('active');
+  if (view === 'editor') mobileNavEditor.classList.add('active');
 }
 
 function filterByFolder(folderId){
   const filtered = folderId ? songsCache.filter(s=> s.folderId === folderId) : songsCache;
   renderSongs(filtered);
-  // NOVO: Atualiza a UI para mostrar a pasta ativa
   setActiveFolder(folderId || 'all');
+  
+  // NOVO: Muda para a lista de músicas ao filtrar no mobile
+  if (window.innerWidth <= 800) {
+    setMobileView('songs');
+  }
 }
 
 function loadSong(id){
@@ -126,14 +144,18 @@ function loadSong(id){
   folderSelect.value = s.folderId || '';
   lyricsInput.value = s.lyrics;
   deleteBtn.style.display = 'inline-block';
-  titleInput.focus(); // NOVO: Foca no título ao carregar
+  titleInput.focus();
+  
+  // NOVO: Muda para o editor ao carregar uma música no mobile
+  if (window.innerWidth <= 800) {
+    setMobileView('editor');
+  }
 }
 
 // Local editor helpers
 form.addEventListener('submit', async (e)=>{
   e.preventDefault();
   
-  // NOVO: Feedback de carregamento e tratamento de erro
   saveBtn.disabled = true;
   saveBtn.textContent = 'Salvando...';
 
@@ -149,14 +171,11 @@ form.addEventListener('submit', async (e)=>{
     if(currentSongId){
       await setDoc(doc(db,'songs',currentSongId), data, {merge:true});
       alert('Atualizado!');
-      // MELHORIA: Não limpa o formulário ao *atualizar*
     } else {
       const docRef = await addDoc(songsCol, data);
       alert('Salvo!');
-      // MELHORIA: Limpa o formulário e seleciona a nova música
-      currentSongId = docRef.id; // NOVO: define o ID da música recém-criada
-      deleteBtn.style.display = 'inline-block'; // NOVO: mostra o botão de excluir
-      // form.reset(); // (Opcional) - agora ele mantém a música salva na tela
+      currentSongId = docRef.id;
+      deleteBtn.style.display = 'inline-block';
     }
   } catch (err) {
     console.error(err);
@@ -167,7 +186,6 @@ form.addEventListener('submit', async (e)=>{
   }
 });
 
-// download as plain text compatible with Holyrics (simple .txt with title then lyrics)
 downloadBtn.addEventListener('click', ()=>{
   const title = titleInput.value.trim() || 'Sem título';
   const content = title + "\n\n" + lyricsInput.value;
@@ -180,38 +198,43 @@ downloadBtn.addEventListener('click', ()=>{
   URL.revokeObjectURL(url);
 });
 
-// delete
 deleteBtn.addEventListener('click', async ()=>{
   if(!currentSongId) return;
   if(!confirm('Confirma exclusão desta música?')) return;
 
-  // NOVO: Tratamento de erro
   try {
     await deleteDoc(doc(db,'songs',currentSongId));
     currentSongId = null;
     form.reset();
-    deleteBtn.style.display = 'none'; // NOVO: esconde botão após excluir
-    alert('Excluído!'); // NOVO: feedback
+    deleteBtn.style.display = 'none';
+    alert('Excluído!');
+    
+    // NOVO: Volta para a lista de músicas ao excluir no mobile
+    if (window.innerWidth <= 800) {
+      setMobileView('songs');
+    }
   } catch (err) {
     console.error(err);
     alert('Erro ao excluir: ' + err.message);
   }
 });
 
-// new song
 newSongBtn.addEventListener('click', ()=>{
   currentSongId = null;
   form.reset();
   deleteBtn.style.display = 'none';
-  titleInput.focus(); // NOVO: Foca no título
+  titleInput.focus();
+  
+  // NOVO: Muda para o editor ao criar nova música no mobile
+  if (window.innerWidth <= 800) {
+    setMobileView('editor');
+  }
 });
 
-// new folder
 newFolderBtn.addEventListener('click', async ()=>{
   const name = prompt('Nome da nova pasta:');
   if(!name || !name.trim()) return;
 
-  // NOVO: Tratamento de erro
   try {
     await addDoc(foldersCol, {name: name.trim(), createdAt: Date.now()});
     alert('Pasta criada!');
@@ -221,7 +244,6 @@ newFolderBtn.addEventListener('click', async ()=>{
   }
 });
 
-// NOVO: Importar .txt
 importBtn.addEventListener('click', () => {
   const fileInput = document.createElement('input');
   fileInput.type = 'file';
@@ -237,11 +259,9 @@ importBtn.addEventListener('click', () => {
         const content = e.target.result;
         const lines = content.split(/\r?\n/);
         
-        // Formato Holyrics: Título (linha 1), linha em branco (linha 2), letra (linha 3+)
         const title = lines[0]?.trim() || 'Importado sem título';
-        const lyrics = lines.slice(2).join('\n'); // Pula título e linha em branco
+        const lyrics = lines.slice(2).join('\n'); 
 
-        // Carrega no editor como uma nova música
         currentSongId = null;
         form.reset();
         titleInput.value = title;
@@ -251,6 +271,11 @@ importBtn.addEventListener('click', () => {
         
         alert('Arquivo importado! Clique em "Salvar" para adicioná-lo.');
         titleInput.focus();
+        
+        // NOVO: Muda para o editor ao importar no mobile
+        if (window.innerWidth <= 800) {
+          setMobileView('editor');
+        }
       } catch (err) {
         console.error(err);
         alert('Erro ao ler o arquivo: ' + err.message);
@@ -267,43 +292,52 @@ importBtn.addEventListener('click', () => {
 onSnapshot(songsCol, (snap)=>{
   songsCache = snap.docs.map(d=> ({id:d.id, ...d.data()}));
   
-  // MELHORIA: Mantém o filtro de pasta ativo ao atualizar
   const activeFolderLi = $('#folderList li.active');
   const activeFolderId = activeFolderLi ? activeFolderLi.dataset.id : 'all';
   filterByFolder(activeFolderId === 'all' ? null : activeFolderId);
   
   renderRecent();
-  refreshCounts(); // Atualiza contagem geral (baseado no cache total)
-});
-
-onSnapshot(foldersCol, (snap)=>{
-  // MELHORIA: Mantém a pasta ativa selecionada
-  const activeFolderLi = $('#folderList li.active');
-  const activeFolderId = activeFolderLi ? activeFolderLi.dataset.id : 'all';
-
-  foldersCache = snap.docs.map(d=> ({id:d.id, ...d.data()})).sort((a,b) => a.name.localeCompare(b.name)); // NOVO: Ordena pastas
-  renderFolders();
-  
-  setActiveFolder(activeFolderId); // Restaura seleção
   refreshCounts();
 });
 
-// simple search
+onSnapshot(foldersCol, (snap)=>{
+  const activeFolderLi = $('#folderList li.active');
+  const activeFolderId = activeFolderLi ? activeFolderLi.dataset.id : 'all';
+
+  foldersCache = snap.docs.map(d=> ({id:d.id, ...d.data()})).sort((a,b) => a.name.localeCompare(b.name));
+  renderFolders();
+  
+  setActiveFolder(activeFolderId);
+  refreshCounts();
+});
+
 searchInput.addEventListener('input', (e)=>{
   const q = e.target.value.toLowerCase();
   
-  // NOVO: Limpa o filtro de pasta ao pesquisar
   setActiveFolder('all'); 
   
   const filtered = songsCache.filter(s=> s.title.toLowerCase().includes(q) || (s.lyrics||'').toLowerCase().includes(q));
   renderSongs(filtered);
+  
+  // NOVO: Muda para a lista de músicas ao pesquisar no mobile
+  if (window.innerWidth <= 800) {
+    setMobileView('songs');
+  }
 });
 
-// quick hint: pressing Shift+Enter keeps a blank line; single Enter is normal newline
 lyricsInput.addEventListener('keydown', (ev)=>{
-  // accessibility hint - no special handling required, but we add small helper: Ctrl+Enter downloads
   if(ev.ctrlKey && ev.key === 'Enter'){
     ev.preventDefault();
     downloadBtn.click();
   }
 });
+
+// NOVO: Event Listeners para a Navegação Móvel
+mobileNavMenu.addEventListener('click', () => setMobileView('menu'));
+mobileNavSongs.addEventListener('click', () => setMobileView('songs'));
+mobileNavEditor.addEventListener('click', () => setMobileView('editor'));
+
+// NOVO: Define a visualização inicial no mobile
+if (window.innerWidth <= 800) {
+  setMobileView('songs'); // Começa na lista de músicas
+}
