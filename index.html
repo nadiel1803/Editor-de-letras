@@ -31,7 +31,7 @@
       <div class="folders">
         <div class="folders-header">
           <h3>Pastas</h3>
-          <button id="newFolderBtn">+</button>
+          <button id="newFolderBtn" aria-label="Nova Pasta">+</button>
         </div>
         <ul id="folderList" class="folder-list"></ul>
       </div>
@@ -47,7 +47,7 @@
         <input id="search" placeholder="Buscar músicas..." />
         <div class="actions">
           <button id="newSongBtn">Nova Música</button>
-          <button id="importBtn">Importar .txt</button>
+          <button id="importBtn" aria-label="Importar arquivo .txt">Importar .txt</button>
         </div>
       </header>
 
@@ -63,7 +63,7 @@
             <textarea id="lyrics" placeholder="Edite a letra aqui. Use 'Enter' para pular linhas como deseja que apareça no telão."></textarea>
 
             <div class="form-actions">
-              <button type="submit">Salvar</button>
+              <button type="submit" id="saveBtn">Salvar</button>
               <button type="button" id="downloadBtn">Baixar .txt (Holyrics)</button>
               <button type="button" id="deleteBtn" class="danger">Excluir</button>
             </div>
