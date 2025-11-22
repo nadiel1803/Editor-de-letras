@@ -1,101 +1,496 @@
-<!doctype html>
-<html lang="pt-BR">
+<!DOCTYPE html>
+<html lang="pt-br">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Holyrics Editor — Editor de Letras</title>
-  <link rel="stylesheet" href="styles.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editor de Músicas</title>
+    
+    <!-- TailwindCSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Lucide Icons CDN (Versão UMD corrigida) -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+
+    <style>
+        /* Define as variáveis de cor para os temas */
+        :root {
+            --bg-primary: #f0f7ff; /* Azul claro (fundo) */
+            --bg-secondary: #ffffff; /* Branco (cards) */
+            --bg-nav: #e6f0ff;
+            --text-primary: #0a2a4d; /* Azul escuro (texto) */
+            --text-secondary: #1e3a8a;
+            --accent: #3b82f6; /* Azul de destaque */
+            --border: #dbeafe;
+        }
+
+        html.dark {
+            --bg-primary: #0a2a4d; /* Azul escuro (fundo) */
+            --bg-secondary: #1e3a8a; /* Azul mais claro (cards) */
+            --bg-nav: #071f3a;
+            --text-primary: #f0f7ff; /* Azul claro (texto) */
+            --text-secondary: #dbeafe;
+            --accent: #60a5fa; /* Azul de destaque claro */
+            --border: #3b82f6;
+        }
+
+        /* Transição suave de cores */
+        body, #app-container, .view {
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        
+        /* Estilos aplicados com CSS para aproveitar as variáveis */
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+        }
+
+        .view {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+        }
+
+        .card {
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+        
+        .nav-bar {
+            background-color: var(--bg-nav);
+            border-top: 1px solid var(--border);
+        }
+        
+        .nav-button.active {
+            color: var(--accent);
+        }
+        
+        .nav-button {
+             color: var(--text-secondary);
+        }
+
+        .btn-primary {
+            background-color: var(--accent);
+            color: white;
+            transition: background-color 0.2s;
+        }
+        .btn-primary:hover {
+            opacity: 0.9;
+        }
+        
+        .btn-secondary {
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+            transition: background-color 0.2s;
+        }
+        .btn-secondary:hover {
+             background-color: var(--bg-primary);
+        }
+
+        input, textarea {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+        }
+        
+        /* Esconde todas as "páginas" por padrão */
+        .view {
+            display: none;
+        }
+        /* Mostra a "página" ativa */
+        .view.active {
+            display: block;
+        }
+        
+        /* Para o switch de tema */
+        .theme-switch {
+            cursor: pointer;
+        }
+    </style>
 </head>
-<body>
-  <div class="app" id="app">
-    <aside class="sidebar">
-      <div class="brand">
-        <h1>Holyrics Editor</h1>
-        <button id="themeToggle" aria-label="Alternar tema">🌗</button>
-      </div>
-      <div class="stats">
-        <div class="stat">
-          <div class="num" id="songsCount">0</div>
-          <div class="label">Músicas</div>
-        </div>
-        <div class="stat">
-          <div class="num" id="foldersCount">0</div>
-          <div class="label">Pastas</div>
-        </div>
-        <div class="stat">
-          <div class="num" id="recentCount">0</div>
-          <div class="label">Recentes</div>
-        </div>
-      </div>
+<body class="font-sans">
 
-      <div class="folders">
-        <div class="folders-header">
-          <h3>Pastas</h3>
-          <button id="newFolderBtn" aria-label="Nova Pasta">+</button>
-        </div>
-        <ul id="folderList" class="folder-list"></ul>
-      </div>
-
-      <div class="recent">
-        <h3>Recentes</h3>
-        <ul id="recentList" class="recent-list"></ul>
-      </div>
-    </aside>
-
-    <main class="main">
-      <header class="topbar">
-        <input id="search" placeholder="Buscar músicas..." />
-        <div class="actions">
-          <button id="newSongBtn">Nova Música</button>
-          <button id="importBtn" aria-label="Importar arquivo .txt">Importar .txt</button>
-        </div>
-      </header>
-
-      <section class="content">
-        <aside class="left-panel">
-          <ul id="songList" class="song-list"></ul>
-        </aside>
-
-        <section class="editor-panel">
-          <form id="songForm" class="song-form">
-            <input id="songTitle" placeholder="Título da música" required />
-            <select id="songFolder"><option value="">— Sem pasta —</option></select>
-            <textarea id="lyrics" placeholder="Edite a letra aqui. Use 'Enter' para pular linhas como deseja que apareça no telão."></textarea>
-
-            <div class="form-actions">
-              <button type="submit" id="saveBtn">Salvar</button>
-              <button type="button" id="downloadBtn">Baixar .txt (Holyrics)</button>
-              <button type="button" id="deleteBtn" class="danger">Excluir</button>
+    <div id="app-container" class="max-w-lg mx-auto min-h-screen flex flex-col">
+        
+        <!-- Cabeçalho Fixo -->
+        <header class="sticky top-0 z-10 p-4 flex justify-between items-center shadow-md" style="background-color: var(--bg-nav); border-bottom: 1px solid var(--border);">
+            <h1 class="text-xl font-bold" id="header-title">Dashboard</h1>
+            <div class="theme-switch" id="theme-toggle">
+                <i data-lucide="sun" class="block dark:hidden"></i>
+                <i data-lucide="moon" class="hidden dark:block"></i>
             </div>
-          </form>
-        </section>
-      </section>
-    </main>
+        </header>
 
-    <nav class="mobile-nav">
-      <button class="mobile-nav-btn" id="mobileNavMenu" aria-label="Menu e Pastas">
-        <span class="icon">☰</span>
-        <span class="label">Menu</span>
-      </button>
-      <button class="mobile-nav-btn" id="mobileNavSongs" aria-label="Lista de Músicas">
-        <span class="icon">♫</span>
-        <span class="label">Músicas</span>
-      </button>
-      <button class="mobile-nav-btn" id="mobileNavEditor" aria-label="Editor de Letra">
-        <span class="icon">✎</span>
-        <span class="label">Editor</span>
-      </button>
-    </nav>
-  </div>
+        <!-- Conteúdo Principal (Páginas) -->
+        <main class="flex-grow p-4 pb-20">
+            
+            <!-- PÁGINA: DASHBOARD -->
+            <div id="dashboard-view" class="view active space-y-4">
+                <h2 class="text-2xl font-semibold mb-4">Estatísticas</h2>
+                
+                <!-- Cards de Estatísticas -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="card p-4 rounded-lg shadow-md">
+                        <h3 class="font-semibold text-lg">Músicas</h3>
+                        <p id="stats-song-count" class="text-3xl font-bold text-[var(--accent)]">0</p>
+                    </div>
+                    <div class="card p-4 rounded-lg shadow-md">
+                        <h3 class="font-semibold text-lg">Pastas</h3>
+                        <p id="stats-folder-count" class="text-3xl font-bold text-[var(--accent)]">0</p>
+                        <span class="text-xs">(Em breve)</span>
+                    </div>
+                </div>
 
-  <template id="songItemTpl">
-    <li class="song-item">
-      <div class="song-title"></div>
-      <div class="song-meta"></div>
-    </li>
-  </template>
+                <!-- Músicas Recentes -->
+                <div>
+                    <h3 class="text-xl font-semibold mb-2">Recentes</h3>
+                    <div id="recent-songs-list" class="space-y-2">
+                        <div class="card p-3 rounded-lg text-center">
+                            <p>Nenhuma música editada ainda.</p>
+                        </div>
+                        <!-- Lista será preenchida pelo JS -->
+                    </div>
+                </div>
+            </div>
 
-  <script type="module" src="firebase.js"></script>
-  <script type="module" src="app.js"></script>
-</body>
-</html>
+            <!-- PÁGINA: LISTA DE MÚSICAS -->
+            <div id="song-list-view" class="view space-y-4">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-2xl font-semibold">Músicas</h2>
+                    <button id="add-new-song-btn" class="btn-primary p-2 rounded-lg flex items-center gap-1">
+                        <i data-lucide="plus" class="w-5 h-5"></i>
+                        Nova
+                    </button>
+                </div>
+                
+                <input type="text" id="search-bar" placeholder="Buscar música..." class="w-full p-2 rounded-lg">
+                
+                <div id="all-songs-list" class="space-y-2">
+                    <!-- Lista de músicas preenchida pelo JS -->
+                    <div class="card p-3 rounded-lg text-center">
+                        <p>Carregando músicas...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PÁGINA: EDITOR DE MÚSICA -->
+            <div id="editor-view" class="view">
+                <button id="back-to-list-btn" class="btn-secondary mb-4 p-2 rounded-lg flex items-center gap-1">
+                    <i data-lucide="arrow-left" class="w-5 h-5"></i>
+                    Voltar
+                </button>
+                
+                <div class="space-y-4">
+                    <input type="hidden" id="editor-song-id">
+                    
+                    <div>
+                        <label for="editor-title" class="block text-sm font-medium mb-1">Título</label>
+                        <input type="text" id="editor-title" placeholder="Nome da Música" class="w-full p-2 rounded-lg text-lg">
+                    </div>
+
+                    <div>
+                        <label for="editor-lyrics" class="block text-sm font-medium mb-1">Letra (Pressione 'Enter' para quebrar as linhas)</label>
+                        <textarea id="editor-lyrics" rows="15" class="w-full p-2 rounded-lg font-mono text-sm leading-6" placeholder="Cole a letra da música aqui e ajuste as quebras de linha..."></textarea>
+                    </div>
+                    
+                    <div class="flex gap-2">
+                        <button id="save-song-btn" class="btn-primary p-3 rounded-lg w-full flex items-center justify-center gap-2">
+                            <i data-lucide="save" class="w-5 h-5"></i>
+                            Salvar
+                        </button>
+                        <button id="download-txt-btn" class="btn-secondary p-3 rounded-lg w-full flex items-center justify-center gap-2">
+                            <i data-lucide="download" class="w-5 h-5"></i>
+                            Baixar .txt
+                        </button>
+                    </div>
+                     <button id="delete-song-btn" class="btn-secondary p-2 rounded-lg w-full flex items-center justify-center gap-2 text-red-500 border-red-300 dark:border-red-500">
+                        <i data-lucide="trash-2" class="w-5 h-5"></i>
+                        Excluir
+                    </button>
+                </div>
+            </div>
+
+        </main>
+
+        <!-- Navegação Fixa (Inferior) -->
+        <nav class="nav-bar fixed bottom-0 left-0 right-0 max-w-lg mx-auto grid grid-cols-2 shadow-inner">
+            <button id="nav-dashboard" class="nav-button active p-4 flex flex-col items-center justify-center">
+                <i data-lucide="layout-dashboard" class="w-6 h-6 mb-1"></i>
+                <span class="text-xs">Dashboard</span>
+            </button>
+            <button id="nav-songs" class="nav-button p-4 flex flex-col items-center justify-center">
+                <i data-lucide="music-2" class="w-6 h-6 mb-1"></i>
+                <span class="text-xs">Músicas</span>
+            </button>
+        </nav>
+    </div>
+
+    <!-- Toast/Mensagem de Feedback -->
+    <div id="toast" class="fixed bottom-20 left-1/2 -translate-x-1/2 bg-gray-900 text-white px-4 py-2 rounded-lg shadow-lg opacity-0 transition-opacity duration-300">
+        Mensagem salva!
+    </div>
+
+
+    <!-- Firebase SDKs -->
+    <script type="module">
+        // Importações do Firebase
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { 
+            getAuth, 
+            signInAnonymously, 
+            onAuthStateChanged 
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { 
+            getFirestore, 
+            collection, 
+            doc, 
+            addDoc, 
+            setDoc, 
+            deleteDoc,
+            onSnapshot, 
+            query,
+            serverTimestamp,
+            setLogLevel
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Configuração do Firebase (fornecida por você)
+        const firebaseConfig = {
+            apiKey: "AIzaSyCAK6isd6VL5cQEe-c6p0lqan9OOpXIBtU",
+            authDomain: "editor-de-letras.firebaseapp.com",
+            projectId: "editor-de-letras",
+            storageBucket: "editor-de-letras.firebasestorage.app",
+            messagingSenderId: "235141484726",
+            appId: "1:235141484726:web:b2c8382d6c5cf9305c9617"
+        };
+        
+        // --- INICIALIZAÇÃO DO APP ---
+
+        // Inicializa Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        
+        // Ativa logs para debug
+        setLogLevel('Debug');
+
+        // Variáveis globais
+        let userId;
+        let songsCollectionRef;
+        let allSongs = [];
+        let currentView = 'dashboard';
+        let currentEditingSongId = null;
+
+        // --- LÓGICA DE AUTENTICAÇÃO E INICIALIZAÇÃO ---
+
+        // Pega o App ID (obrigatório pelas regras do ambiente)
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'holyrics-editor-default';
+
+        // Escuta mudanças no estado de autenticação
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // Usuário está logado (anonimamente)
+                userId = user.uid;
+                console.log("Usuário autenticado:", userId);
+                // Inicializa a lógica principal do app
+                initializeAppLogic();
+            } else {
+                // Ninguém logado, tenta login anônimo
+                console.log("Nenhum usuário, tentando login anônimo...");
+                signInAnonymously(auth).catch((error) => {
+                    console.error("Erro no login anônimo:", error);
+                    alert("Não foi possível conectar. Verifique sua conexão.");
+                });
+            }
+        });
+
+        // --- LÓGICA PRINCIPAL DO APP ---
+
+        function initializeAppLogic() {
+            // Define a referência da coleção DEPOIS de ter o userId
+            // Caminho privado para os dados do usuário
+            songsCollectionRef = collection(db, `artifacts/${appId}/users/${userId}/songs`);
+            console.log("Referência da coleção:", `artifacts/${appId}/users/${userId}/songs`);
+
+            // Configura os ouvintes de eventos (cliques)
+            setupEventListeners();
+            
+            // Carrega o tema salvo
+            initializeTheme();
+            
+            // Inicia o listener do Firestore para carregar dados
+            setupFirestoreListener();
+            
+            // Renderiza os ícones (AGORA que temos certeza que o lucide global existe)
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            } else {
+                console.warn("Lucide library not loaded yet.");
+            }
+            
+            // Mostra a view inicial
+            showView('dashboard');
+        }
+
+        // --- NAVEGAÇÃO E CONTROLE DE VIEW ---
+        
+        const views = {
+            'dashboard': document.getElementById('dashboard-view'),
+            'songs': document.getElementById('song-list-view'),
+            'editor': document.getElementById('editor-view')
+        };
+        const navButtons = {
+            'dashboard': document.getElementById('nav-dashboard'),
+            'songs': document.getElementById('nav-songs')
+        };
+        const headerTitle = document.getElementById('header-title');
+        const headerTitles = {
+            'dashboard': 'Dashboard',
+            'songs': 'Minhas Músicas',
+            'editor': 'Editor de Música'
+        };
+
+        function showView(viewId, context = {}) {
+            currentView = viewId;
+            
+            // Esconde todas as views
+            Object.values(views).forEach(view => view.classList.remove('active'));
+            
+            // Remove 'active' de todos os botões de navegação
+            Object.values(navButtons).forEach(btn => btn?.classList.remove('active'));
+
+            // Mostra a view correta
+            if (views[viewId]) {
+                views[viewId].classList.add('active');
+            }
+            
+            // Ativa o botão de navegação correto
+            if (navButtons[viewId]) {
+                navButtons[viewId].classList.add('active');
+            }
+            
+            // Atualiza o título do cabeçalho
+            headerTitle.textContent = headerTitles[viewId] || 'Editor';
+            
+            // Lógica específica ao abrir o editor
+            if (viewId === 'editor') {
+                const titleInput = document.getElementById('editor-title');
+                const lyricsInput = document.getElementById('editor-lyrics');
+                const songIdInput = document.getElementById('editor-song-id');
+                const deleteBtn = document.getElementById('delete-song-btn');
+
+                if (context.isNew) {
+                    // Limpa campos para nova música
+                    titleInput.value = '';
+                    lyricsInput.value = '';
+                    songIdInput.value = '';
+                    currentEditingSongId = null;
+                    deleteBtn.style.display = 'none'; // Esconde botão de excluir
+                } else if (context.song) {
+                    // Preenche campos com música existente
+                    titleInput.value = context.song.title;
+                    lyricsInput.value = context.song.lyrics;
+                    songIdInput.value = context.song.id;
+                    currentEditingSongId = context.song.id;
+                    deleteBtn.style.display = 'flex'; // Mostra botão de excluir
+                }
+            }
+        }
+
+        // --- LÓGICA DO TEMA (CLARO/ESCURO) ---
+
+        const themeToggle = document.getElementById('theme-toggle');
+
+        function initializeTheme() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            if (savedTheme === 'dark') {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        }
+
+        themeToggle.addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+            const currentTheme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+            localStorage.setItem('theme', currentTheme);
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons(); // Recria ícones para trocar sol/lua
+            }
+        });
+
+        // --- LÓGICA DO FIRESTORE (DADOS) ---
+
+        function setupFirestoreListener() {
+            // Cria um query (embora não vamos ordenar aqui para evitar índices)
+            const q = query(songsCollectionRef);
+
+            // O onSnapshot escuta mudanças em tempo real
+            onSnapshot(q, (snapshot) => {
+                console.log("Dados recebidos do Firestore:", snapshot.docs.length, "documentos");
+                allSongs = snapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                }));
+                
+                // Ordena as músicas em memória (JS) por data de edição
+                allSongs.sort((a, b) => {
+                    const timeA = a.lastEdited?.toDate() || 0;
+                    const timeB = b.lastEdited?.toDate() || 0;
+                    return timeB - timeA; // Mais recente primeiro
+                });
+
+                // Atualiza a UI com os novos dados
+                updateDashboard();
+                updateSongList();
+            }, (error) => {
+                console.error("Erro ao escutar coleção:", error);
+                alert("Erro ao carregar dados. Verifique o console.");
+            });
+        }
+
+        // --- ATUALIZAÇÃO DA UI (VIEWS) ---
+
+        function updateDashboard() {
+            // Atualiza contadores
+            document.getElementById('stats-song-count').textContent = allSongs.length;
+            // document.getElementById('stats-folder-count').textContent = 0; // Mockado
+
+            // Atualiza recentes
+            const recentList = document.getElementById('recent-songs-list');
+            recentList.innerHTML = ''; // Limpa a lista
+            
+            const recentSongs = allSongs.slice(0, 3); // Pega as 3 mais recentes
+
+            if (recentSongs.length === 0) {
+                recentList.innerHTML = `<div class="card p-3 rounded-lg text-center"><p>Nenhuma música editada ainda.</p></div>`;
+                return;
+            }
+
+            recentSongs.forEach(song => {
+                const songEl = document.createElement('div');
+                songEl.className = 'card p-3 rounded-lg shadow-sm flex justify-between items-center cursor-pointer';
+                songEl.innerHTML = `
+                    <span>${song.title || 'Sem Título'}</span>
+                    <i data-lucide="chevron-right" class="w-5 h-5 text-[var(--text-secondary)]"></i>
+                `;
+                songEl.addEventListener('click', () => showView('editor', { song: song, isNew: false }));
+                recentList.appendChild(songEl);
+            });
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons(); // Recria ícones
+            }
+        }
+
+        function updateSongList(filter = '') {
+            const songList = document.getElementById('all-songs-list');
+            songList.innerHTML = '';
+            
+            const filteredSongs = allSongs.filter(song => 
+                song.title.toLowerCase().includes(filter.toLowerCase())
+            );
+            
+            // Re-ordena alfabeticamente para a lista
+            filteredSongs.sort((a, b) => a.title.localeCompare(b.title));
+
+            if (filteredSongs.length === 0) {
+                songList.innerHTML = `<div cla
