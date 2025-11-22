@@ -1,0 +1,357 @@
+/* Import da Fonte */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+/* --- Variáveis de Cor --- */
+:root {
+    --color-primary-light: #7380ec;
+    --color-primary: #4154F1; /* Azul principal */
+    --color-primary-dark: #2C3BAC;
+    --color-white: #FFFFFF;
+    --color-light: #F6F6F9;
+    --color-dark: #363949;
+    --color-dark-variant: #677483;
+    --color-black: #000000;
+    --color-bg: var(--color-light);
+    --color-text: var(--color-dark);
+    --color-card-bg: var(--color-white);
+    --color-sidebar-bg: var(--color-white);
+    --color-info: #A4A6B3;
+
+    --box-shadow: 0 2rem 3rem rgba(132, 139, 200, 0.18);
+    --transition: all 0.3s ease;
+}
+
+/* --- Tema Escuro --- */
+[data-theme="dark"] {
+    --color-bg: #181A1E;
+    --color-text: var(--color-light);
+    --color-card-bg: #202528;
+    --color-sidebar-bg: #202528;
+    --color-dark: #EDF2F4;
+    --color-dark-variant: #A3BDCC;
+    --color-light: #202528;
+    --color-info: #8A93A0;
+    --box-shadow: 0 2rem 3rem rgba(0, 0, 0, 0.1);
+}
+
+/* --- Estilos Globais --- */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    text-decoration: none;
+    list-style: none;
+    border: none;
+    outline: none;
+}
+
+html {
+    font-size: 14px;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background: var(--color-bg);
+    color: var(--color-text);
+    transition: var(--transition);
+}
+
+.container {
+    display: grid;
+    width: 96%;
+    max-width: 1800px;
+    margin: 0 auto;
+    gap: 1.8rem;
+    grid-template-columns: 14rem auto;
+}
+
+h1, h2, h3 {
+    font-weight: 600;
+}
+
+h1 { font-size: 2rem; }
+h2 { font-size: 1.4rem; }
+h3 { font-size: 0.87rem; }
+
+.primary {
+    color: var(--color-primary);
+}
+
+/* --- Sidebar (Menu) --- */
+aside {
+    height: 100vh;
+    background: var(--color-sidebar-bg);
+    transition: var(--transition);
+}
+
+aside .top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 1.4rem;
+    padding: 0 0.8rem;
+}
+
+aside .logo h2 {
+    color: var(--color-dark);
+}
+
+aside .sidebar {
+    display: flex;
+    flex-direction: column;
+    height: 86vh;
+    position: relative;
+    top: 3rem;
+}
+
+aside .sidebar a {
+    display: flex;
+    color: var(--color-dark-variant);
+    margin-left: 2rem;
+    gap: 1rem;
+    align-items: center;
+    position: relative;
+    height: 3.7rem;
+    transition: var(--transition);
+}
+
+aside .sidebar a:last-child {
+    position: absolute;
+    bottom: 2rem;
+    width: 100%;
+}
+
+aside .sidebar a.active {
+    background: var(--color-light);
+    color: var(--color-primary);
+    margin-left: 0;
+}
+
+aside .sidebar a.active::before {
+    content: "";
+    width: 6px;
+    height: 100%;
+    background: var(--color-primary);
+}
+
+aside .sidebar a.active span {
+    color: var(--color-primary);
+    margin-left: calc(1rem - 6px);
+}
+
+aside .sidebar a:hover {
+    color: var(--color-primary);
+}
+
+/* --- Conteúdo Principal (Main) --- */
+main {
+    margin-top: 1.4rem;
+    padding-right: 2rem;
+}
+
+.page-content {
+    animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- Interruptor de Tema --- */
+.theme-switcher {
+    display: flex;
+    background: var(--color-light);
+    justify-content: space-between;
+    align-items: center;
+    height: 1.6rem;
+    width: 4.2rem;
+    cursor: pointer;
+    border-radius: 0.4rem;
+    position: absolute;
+    top: 1.4rem;
+    right: 2rem;
+}
+
+.theme-switcher span {
+    font-size: 1.2rem;
+    width: 50%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-info);
+}
+
+.theme-switcher span.active {
+    background: var(--color-primary);
+    color: white;
+    border-radius: 0.4rem;
+}
+
+/* Toggle Switch (Escondido, mas funcional) */
+.theme-toggle-switch {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    opacity: 0; /* Apenas para posicionar o label */
+}
+.theme-toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+/* --- Dashboard --- */
+.stats-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.6rem;
+    margin-top: 1rem;
+}
+
+.card {
+    background: var(--color-card-bg);
+    padding: 1.8rem;
+    border-radius: 1rem;
+    box-shadow: var(--box-shadow);
+    transition: var(--transition);
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.card:hover {
+    box-shadow: none;
+}
+
+.card span {
+    background: var(--color-primary);
+    color: var(--color-white);
+    padding: 0.5rem;
+    border-radius: 50%;
+    font-size: 2rem;
+}
+
+.card .info h3 {
+    color: var(--color-dark-variant);
+    font-size: 1rem;
+}
+.card .info h1 {
+    font-size: 2.2rem;
+}
+
+/* --- Editor de Letras --- */
+.editor-container {
+    margin-top: 1rem;
+    background: var(--color-card-bg);
+    padding: 1.8rem;
+    border-radius: 1rem;
+    box-shadow: var(--box-shadow);
+}
+
+#song-title {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    font-size: 1.2rem;
+    font-weight: 600;
+    border-radius: 0.5rem;
+    background: var(--color-bg);
+    color: var(--color-text);
+    margin-bottom: 1rem;
+}
+
+#lyrics-editor {
+    width: 100%;
+    height: 50vh;
+    min-height: 300px;
+    padding: 1rem;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 1.1rem;
+    line-height: 1.6;
+    border-radius: 0.5rem;
+    background: var(--color-bg);
+    color: var(--color-text);
+    resize: vertical;
+}
+
+.editor-actions {
+    margin-top: 1rem;
+    display: flex;
+    gap: 1rem;
+}
+
+.btn {
+    padding: 0.8rem 1.5rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    background: var(--color-light);
+    color: var(--color-dark-variant);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: var(--transition);
+}
+
+.btn:hover {
+    background: var(--color-info);
+    color: var(--color-white);
+}
+
+.btn.btn-primary {
+    background: var(--color-primary);
+    color: var(--color-white);
+}
+
+.btn.btn-primary:hover {
+    background: var(--color-primary-dark);
+}
+
+/* --- Responsividade --- */
+@media screen and (max-width: 1200px) {
+    .container {
+        width: 94%;
+        grid-template-columns: 7rem auto;
+    }
+    aside .logo h2 { display: none; }
+    aside .sidebar h3 { display: none; }
+    aside .sidebar a { width: 5.6rem; }
+    aside .sidebar a:last-child { position: relative; margin-top: 1.8rem; }
+}
+
+@media screen and (max-width: 768px) {
+    .container {
+        width: 100%;
+        grid-template-columns: 1fr;
+    }
+    aside {
+        position: fixed;
+        left: -100%; /* Escondido por padrão */
+        background: var(--color-sidebar-bg);
+        width: 18rem;
+        z-index: 3;
+        height: 100vh;
+        padding-right: 1rem;
+        display: none; /* Simplificando para este exemplo */
+    }
+    
+    /* TODO: Adicionar um botão 'Menu' para mostrar/esconder a sidebar no mobile */
+
+    main {
+        margin-top: 8rem;
+        padding: 0 1rem;
+    }
+
+    .theme-switcher {
+        width: auto;
+        right: 1rem;
+        top: 1rem;
+        background: none;
+    }
+
+    .stats-cards {
+        grid-template-columns: 1fr;
+    }
+}
+
